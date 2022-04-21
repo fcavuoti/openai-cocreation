@@ -1,11 +1,12 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import init from "./api/init";
 import styles from "./index.module.css";
 
 const MAX_LEN = 10;
 
 export default function Home() {
-  const [topic, setTopic] = useState("dog");
+  const [topic, setTopic] = useState("rain");
   const [story, setStory] = useState();
   const [input, setInput] = useState("");
   const [storyLen, setStoryLen] = useState(0);
@@ -16,7 +17,6 @@ export default function Home() {
 
   useEffect(() => {
     initStory();
-    setStoryLen(storyLen + 1);
   }, []);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function Home() {
   }
 
   async function initStory() {
-    console.log("topic: ", topic);
+    // console.log("topic: ", topic);
     const response = await fetch("/api/init", {
       method: "POST",
       headers: {
@@ -38,16 +38,17 @@ export default function Home() {
     });
 
     const data = await response.json();
-    const new_story = data.result;
-    console.log("Start: ", new_story);
+    const new_story = await data.result;
+    // console.log("Start: ", new_story);
     setStory(new_story);
+    setStoryLen(storyLen + 1);
   } 
 
   async function onSubmitCont(event) {
     // let sent = event.target.value;
     // let new_sent = sent[0].toUpperCase() + sent.slice(1).toLowerCase();
-    console.log("input: ", input);
-    console.log("story: ", story);
+    //console.log("input: ", input);
+    // console.log("story: ", story);
 
     let story_and_input = story.concat(' ', input);
     console.log("new story: ", story_and_input);
@@ -62,8 +63,8 @@ export default function Home() {
     });
     const data = await response.json();
 
-    let story_and_input_compl = story_and_input.concat(' ', data.result);
-    console.log("Story w completion: ", story_and_input_compl);
+    let story_and_input_compl = story_and_input.concat(' ', await data.result);
+    //console.log("Story w completion: ", story_and_input_compl);
     setStory(story_and_input_compl);
   }
 
@@ -77,18 +78,31 @@ export default function Home() {
       body: JSON.stringify({ story: story }),
     });
     const data = await response.json();
+    const final_sent = await data.result;
+    const finale = " The end.";
 
-    let story_and_end = story.concat(' ', data.result);
-    console.log("Story w end: ", story_and_end);
+    let story_and_end = story.concat(' ', final_sent + finale);
+    //console.log("Story w end: ", story_and_end);
     setStory(story_and_end);
   }
 
+  function resetBoard() {
+    setStory();
+    setStoryLen(0);
+    setInput("");
+    initStory();
+  }
+
   async function onSubmit(event) {
+    console.log("len: ", storyLen);
     if (storyLen + 2 <= MAX_LEN) {
       await onSubmitCont(event);
       setStoryLen(storyLen + 2);
     } else {
       await onSubmitEnd(event);
+      setTimeout(() => {
+        resetBoard();
+      }, 5000);
     }
   }
 

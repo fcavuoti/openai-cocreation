@@ -5,13 +5,13 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-export default async function (req, res) {
+export default async function Generate(req, res) {
   const completion = await openai.createCompletion("text-davinci-002", {
     prompt: generatePrompt(req.body.story),
     temperature: 0.6,
   });
-  const done = await res.status(200).json({ result: completion.data.choices[0].text });
-  console.log(done);
+  const done = res.status(200).json({ result: completion.data.choices[0].text });
+  console.log(await done);
 }
 
 function generatePrompt(story) {
