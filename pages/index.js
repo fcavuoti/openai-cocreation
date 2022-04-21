@@ -4,21 +4,42 @@ import styles from "./index.module.css";
 
 export default function Home() {
   const [topic, setTopic] = useState("dog");
-  const [story, setStory] = useState("Once upon a time there was a dog.");
+  const [story, setStory] = useState();
   const [input, setInput] = useState("");
-  const [status, setStatus] = useState(1);
+  const [status, setStatus] = useState();
 
   useEffect(() => {
     console.log(input);
-  })
+  });
+
+  useEffect(() => {
+    initStory();
+    setStatus(0);
+  }, []);
 
   useEffect(() => {
     clearInput()
-  }, [story])
+  }, [story]);
 
   function clearInput() {
     setInput("");
   }
+
+  async function initStory() {
+    console.log("topic: ", topic);
+    const response = await fetch("/api/init", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ topic: topic }),
+    });
+    
+    const data = await response.json();
+    const new_story = data.result;
+    console.log("Start: ", new_story);
+    setStory(new_story);
+  } 
 
   async function onSubmitCont(event) {
     // let sent = event.target.value;
@@ -61,8 +82,8 @@ export default function Home() {
   }
 
   async function onSubmit(event) {
-    if (status === 0) await onSubmitCont(event)
-    else if (status === 1) await onSubmitEnd(event)
+    if (status === 0) await onSubmitCont(event);
+    else if (status === 1) await onSubmitEnd(event);
   }
 
   return (
