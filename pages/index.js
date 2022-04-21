@@ -2,11 +2,13 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import styles from "./index.module.css";
 
+const MAX_LEN = 10;
+
 export default function Home() {
   const [topic, setTopic] = useState("dog");
   const [story, setStory] = useState();
   const [input, setInput] = useState("");
-  const [status, setStatus] = useState();
+  const [storyLen, setStoryLen] = useState(0);
 
   useEffect(() => {
     console.log(input);
@@ -14,7 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     initStory();
-    setStatus(0);
+    setStoryLen(storyLen + 1);
   }, []);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function Home() {
       },
       body: JSON.stringify({ topic: topic }),
     });
-    
+
     const data = await response.json();
     const new_story = data.result;
     console.log("Start: ", new_story);
@@ -82,8 +84,12 @@ export default function Home() {
   }
 
   async function onSubmit(event) {
-    if (status === 0) await onSubmitCont(event);
-    else if (status === 1) await onSubmitEnd(event);
+    if (storyLen + 2 <= MAX_LEN) {
+      await onSubmitCont(event);
+      setStoryLen(storyLen + 2);
+    } else {
+      await onSubmitEnd(event);
+    }
   }
 
   return (

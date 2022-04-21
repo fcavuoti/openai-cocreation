@@ -10,7 +10,8 @@ export default async function (req, res) {
     prompt: endStory(req.body.story),
     temperature: 0.6,
   });
-  res.status(200).json({ result: completion.data.choices[0].text });
+  const done = res.status(200).json({ result: completion.data.choices[0].text });
+  console.log(done);
 }
 
 function endStory(story) {
